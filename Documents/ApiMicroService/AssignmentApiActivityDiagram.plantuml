@@ -1,0 +1,26 @@
+@startuml
+
+start
+
+:AssignmentAddRq received;
+if (Is authentication token valid?) then (yes)
+  :Proceed;
+else (no)
+  :Return HTTP 401;
+  detach
+endif
+
+:Map to domain object;
+
+if (Is BMS data valid?) then (yes)
+  :Enqueue message to RabbitMQ
+  for processing by transformer;
+  :Return HTTP 201;  
+else (no)
+  :Return HTTP 400;
+  detach
+endif
+
+stop
+
+@enduml

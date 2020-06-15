@@ -1,0 +1,30 @@
+@startuml
+
+title API Microservice
+
+'External
+    
+    "Client Request" #LightGray -[#Blue]-> [Add Assignment Request] "addAssignmentRequest" as ReceiveAddAssignment #WhiteSmoke
+
+'Api Service
+    partition ApiMicroservice {
+        ReceiveAddAssignment -[#Blue]-> [POST AddAssignmentRq] ReceivedAddAssignment        
+        ReceivedAddAssignment -[#Blue]-> [receive message] ValidateBMSRequest        
+        ResponseFromTransformer -[#Blue]-> [Response Valid] RecievedResponseValid
+        ResponseFromTransformer -[#Red]-> [Response Invalid] ReceivedResponseInValid
+        RecievedResponseValid -[#Blue]-> [Publish AddAssignmentRequest] PublishToB2BInternal
+    }
+    
+    RecievedAddAssignment -[#Blue]-> [store entity] "Mongo Database" as StoreEntityToMongo #LightBlue
+    
+    partition TransformerMicroservice {
+        ValidateBMSRequest -[#Blue]-> [POST ValidateAddAssignmentRq] ReceivedValidateAddAssignment        
+        ReceivedValidateAddAssignment -[#Blue]-> [POST Response 201 ValidBMS] ResponseFromTransformer
+        ReceivedValidateAddAssignment -[#Red]-> [POST Response 400 InValidBMS] ResponseFromTransformer
+    }
+
+    ReceivedResponseInValid -[#Red]-> [POST 400 Assignment Data is Invalid] "Client Response" #LightGray
+    RecievedResponseValid -[#Blue]-> [POST 201] "Client Response"
+    PublishToB2BInternal -[#Blue]-> [Publish AddAssignmentRequest] B2BInternalQueue (Rabbit)\nassignment.recieved #LightBlue
+
+@enduml

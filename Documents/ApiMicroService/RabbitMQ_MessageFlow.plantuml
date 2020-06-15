@@ -1,0 +1,107 @@
+@startuml
+
+title RabbitMQ Message Flow - Assignment v1 & v2
+
+cloud {
+    [Audatex Client]
+}
+   
+node "Enterprise API" {
+  HTTP -> [AssignmentController]
+  [AssignmentService]
+
+note right
+AddAssignmentRequest
+{
+    string ApiVersion
+    string UserName
+    AddAssignmentRequestHeader Header 
+    {
+        string MessageType	
+        string Id	
+        string Cid
+    }
+
+    AddAssignmentRequestBody Body 
+    {
+        string BmsVer	
+        string ClaimNumber	    
+        string Content
+    }
+
+    ResponseRouteRequest ResponseRoute 
+    { 
+        AuthorizationRequest Authorization 
+        { 
+            string Href
+		    AuthorizationBodyRequest Body 
+            { 
+                string Client_Id		    
+                string Client_Secret
+                string Audience
+                string Scope
+            }
+        }
+	
+        List<ResponseMessageRequest> ResponseMessage 
+        {
+            string Type { get; set; }
+            string Href { get; set; }
+        }
+    }
+}
+
+Publis To
+    assignment.received@B2BTopicsExchange
+end note
+
+}
+ 
+node "Message Transformer" {      
+    [AssignmentService ]
+} 
+
+node "Message Responder" {    
+    [Assignment Service  ]
+    [RestService]
+}
+
+node "CM Wrapper" {    
+    [Legacy CM Service]    
+}
+
+node "Novo Claims Manager/CLMS" {    
+  [CLMS]
+  [Eagle]
+}
+
+node "Legacy Claims Manager/CLMS" {    
+  [Legacy CLMS]
+}
+
+queue {
+    [B2B Internal Message Queue]
+}
+
+queue {
+    [Shared Message Queue]
+}
+
+[Audatex Client] -up-> [HTTP] : Client sends BMS
+[AssignmentController] -up-> [AssignmentService]
+[AssignmentService] -down-> [B2B Internal Message Queue]
+[B2B Internal Message Queue] -> [AssignmentService ]
+[AssignmentService ] -right-> [Legacy CM Service] : (v1) CM Format 
+[Legacy CM Service]  -down-> [Legacy CLMS] : (v1)
+[Legacy CLMS] -> [Legacy CM Service] : (v1)
+[Legacy CM Service] -> [Assignment Service  ]
+[Assignment Service  ] -> [RestService]
+[RestService] -up-> [Audatex Client] : Client receives acknowledgment
+
+
+[AssignmentService ] -right-> [Shared Message Queue] : (v2) CM Format 
+[Shared Message Queue]  -down-> [CLMS] : (v2)
+[CLMS]  -down-> [Shared Message Queue] : (v2)
+[Shared Message Queue] -> [Assignment Service  ]
+
+@enduml

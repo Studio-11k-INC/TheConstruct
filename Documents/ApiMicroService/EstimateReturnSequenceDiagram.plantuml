@@ -1,0 +1,16 @@
+@startuml
+actor Client
+entity MessageResponder
+entity GetDocuments
+entity EagleAPI
+boundary SharedMessageQueue
+entity CLMS
+
+CLMS -> SharedMessageQueue : Estimate complete event message sent
+SharedMessageQueue -> MessageResponder : B2B receives message
+MessageResponder -> EagleAPI : Calls Eagle API to retrieve estimate info
+EagleAPI -> MessageResponder : Estimate info retrieved
+MessageResponder -> Client : Notify the client
+Client -> GetDocuments : Client calls GetDocuments to retrieve the raw data of the attachments
+
+@enduml

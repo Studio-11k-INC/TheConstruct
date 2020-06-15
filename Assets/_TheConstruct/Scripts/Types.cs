@@ -1,0 +1,45 @@
+public enum ePrefabType
+{
+	WALL,
+	FLOORPLAN,
+	INVALID
+}
+
+public enum eMessages
+{
+	NONE,
+	FLOORPLAN_START = 1,
+	FLOORPLAN_FADEIN = 2,
+	FLOORPLAN_FADEIN_DONE = 3,
+	FLOORPLAN_STOP = 10,
+
+	WALL_START = 100,
+	WALL_GROW,
+	WALL_FULL_HEIGHT,
+	WALL_FLIP_NORMALS,
+	WALL_STOP = 110,
+
+	CAMERA_START = 900,
+	CAMERA_NEXT,
+	CAMERA_PREVIOUS,	
+	CAMERA_STOP = 910,
+
+	ALL = 1000
+}
+
+public enum eFloorPlanState
+{
+	IDLE,
+	FADEIN,
+	FADEOUT,
+	END
+}
+
+public enum eWallState
+{
+	IDLE,
+	GROW,
+	SELECTED,
+	END,
+}
+

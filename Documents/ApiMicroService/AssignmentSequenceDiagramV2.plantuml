@@ -1,0 +1,19 @@
+@startuml
+actor Client
+entity EnterpriseAPI
+entity MessageTransformer
+entity MessageResponder
+boundary SharedMessageQueue
+entity NovoCM
+
+Client -> EnterpriseAPI : Client sends AssignmentAddRq
+EnterpriseAPI -> MessageTransformer : API validates BMS
+EnterpriseAPI -> Client : Send HTTP 201
+EnterpriseAPI -> MessageTransformer : Enqueue message for transformation
+MessageTransformer -> SharedMessageQueue : Send message to shared exchange
+SharedMessageQueue -> NovoCM : CM processes message
+NovoCM -> SharedMessageQueue : CM posts response to the queue
+SharedMessageQueue -> MessageResponder : Responder consumes the message
+MessageResponder -> Client : Notify the client
+
+@enduml

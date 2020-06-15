@@ -1,0 +1,62 @@
+@startuml
+
+[*] --> VisulationDataRecieved
+VisulationDataRecieved : floorPlang.png
+VisulationDataRecieved : geometry.json
+VisulationDataRecieved : geometry.
+
+VisulationDataRecieved -> Preprocessing
+
+state Preprocessing {
+
+DeserializeJson : deserialize json into Wall Model
+
+DeserializeJson -> ParseWallModelData
+ParseWallModelData : Parse model data into usable Vector2 data that describes Walls
+
+note left of DeserializeJson
+ public partial class WallSegment
+{
+	public double X { get; set; }
+	public double Y { get; set; }
+}
+
+public partial class Walls
+{	
+	public long Width { get; set; }
+	public long Height { get; set; }	
+	public WallSegment[][] WallSegments { get; set; }
+}
+end note
+
+}
+
+Preprocessing -> Instantiations
+
+state Instantiations {
+    InstantiateFlooringPlan : Instantiate Flooring Plan with Flooring Prefab
+    InstantiateWalls : Instantiate all Walls using Wall Prefab
+    
+}
+
+Instantiations -> ProcessScene
+
+state ProcessScene {
+    ExtrudeWalls : Scale Wall GameObjects to match required height (9')
+
+    ExtrudeWalls -> ApplyMaterials
+    ApplyMaterials : Apply requested materials and textures
+
+    ApplyMaterials -> AdjustLighting
+    AdjustLighting : Adjust the Lighting to meet requested atmosphere
+
+    AdjustLighting -> AdjustCamera
+    AdjustCamera : Adjust camera filters and position to meet requested atmosphere
+}
+
+state PostProcess {
+AdjustCamera -> Render
+Render : Render photo realistic image
+}
+
+@enduml

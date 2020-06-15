@@ -1,0 +1,49 @@
+@startuml
+
+title Assignment Workflow Version 1x
+
+cloud {
+    [Audatex Client]
+}
+   
+node "Enterprise API" {
+  HTTP -> [AssignmentController]
+  [AssignmentService]
+}
+ 
+node "Message Transformer" {  
+    [HTTP ] -> [ValidationController]    
+    [AssignmentService ]
+} 
+
+node "Message Responder" {    
+    [Assignment Service  ]
+    [RestService]
+}
+
+node "CM Wrapper" {    
+    [Legacy CM Service]    
+}
+
+node "Legacy Claims Manager/CLMS" {    
+  [CLMS]
+}
+
+queue {
+    [B2B Internal Message Queue]
+}
+
+
+[Audatex Client] -up-> [HTTP] : Client sends BMS
+[AssignmentController] -up-> [AssignmentService]
+[AssignmentService] -down-> [B2B Internal Message Queue]
+[AssignmentService] <-> [HTTP ] : BMS Validation
+[B2B Internal Message Queue] -> [AssignmentService ]
+[AssignmentService ] -right-> [Legacy CM Service] : CM Format 
+[Legacy CM Service]  -down-> [CLMS]
+[CLMS] -> [Legacy CM Service] 
+[Legacy CM Service] -> [Assignment Service  ]
+[Assignment Service  ] -> [RestService]
+[RestService] -up-> [Audatex Client] : Client receives acknowledgment
+
+@enduml

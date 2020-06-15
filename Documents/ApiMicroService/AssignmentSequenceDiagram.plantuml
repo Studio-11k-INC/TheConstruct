@@ -1,0 +1,19 @@
+@startuml
+actor Client
+entity EnterpriseAPI
+entity MessageTransformer
+entity MessageResponder
+boundary LegacyCMWrapper
+entity LegacyCM
+
+Client -> EnterpriseAPI : Client sends AssignmentAddRq
+EnterpriseAPI -> MessageTransformer : API validates BMS
+EnterpriseAPI -> Client : Send HTTP 201
+EnterpriseAPI -> MessageTransformer : Enqueue message for transformation
+MessageTransformer -> LegacyCMWrapper : Send message to legacy CM
+LegacyCMWrapper -> LegacyCM : CM processes message
+LegacyCM -> LegacyCMWrapper : CM posts response to the queue
+LegacyCMWrapper -> MessageResponder : Responder consumes the message
+MessageResponder -> Client : Notify the client
+
+@enduml

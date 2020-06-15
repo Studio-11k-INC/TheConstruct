@@ -1,0 +1,27 @@
+@startuml
+actor Client
+entity EnterpriseAPI
+entity MessageTransformer
+entity MessageResponder
+boundary SharedMessageQueue
+entity NovoCM
+entity EagleAPI
+
+NovoCM -> SharedMessageQueue : Assignment Dispatched event message sent
+SharedMessageQueue -> MessageResponder : B2B receives message
+MessageResponder -> SharedMessageQueue : Request assignment info
+SharedMessageQueue -> NovoCM : Message received
+NovoCM -> SharedMessageQueue : Send assignment data
+SharedMessageQueue -> MessageResponder : Receive assignment data
+MessageResponder -> Client : Send AssignmentAddRs
+Client -> EnterpriseAPI : Client calls API to update assignment (AssignmentChgRq)
+EnterpriseAPI -> MessageTransformer : Transform BMS data
+MessageTransformer -> SharedMessageQueue : Send data object to CM
+SharedMessageQueue -> NovoCM : Message received
+NovoCM -> EagleAPI : Update rates
+EagleAPI -> NovoCM : 
+NovoCM -> SharedMessageQueue : Send confirmation
+SharedMessageQueue -> MessageResponder : Convert to AssignmentChgRs
+MessageResponder -> Client : Send AssignmentChgRs
+
+@enduml
